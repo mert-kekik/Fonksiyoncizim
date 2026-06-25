@@ -6,7 +6,7 @@ Modern, interaktif ve siberpunk (neon) temalı bir matematiksel fonksiyon çizic
 ![Kullanılan Teknolojiler](https://img.shields.io/badge/Teknoloji-Vanilla_JS_|_Plotly_|_Math.js-blue)
 
 ## 🚀 Canlı Demo
-Projeyi hemen denemek için buraya tıklayın: [MATH.FX Canlı Demo](https://<kullanici-adin>.github.io/math-fx-repo-adin/) *(Not: Bu linki GitHub Pages aktif ettikten sonra güncelleyin)*
+Projeyi hemen denemek için buraya tıklayın: https://mert-kekik.github.io/Fonksiyoncizim/
 
 ## ✨ Özellikler
 
@@ -30,6 +30,6 @@ Projeyi hemen denemek için buraya tıklayın: [MATH.FX Canlı Demo](https://<ku
 
 Bu proje herhangi bir sunucu veya derleme (build) işlemine ihtiyaç duymaz. Tamamen istemci tarafında (Client-side) çalışır.
 
-https://mert-kekik.github.io/Fonksiyoncizim/
+
 
 
