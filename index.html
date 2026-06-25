@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Fonksiyon Çizici</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+
+    <style>
+        /* --- GENEL AYARLAR VE NEON DEĞİŞKENLER --- */
+        :root {
+            --bg-color: #05050a;
+            --panel-bg: #11111a;
+            --neon-pink: #ff007f;
+            --neon-cyan: #00f3ff;
+            --text-color: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box; /* Padding'lerin ekranı taşırmasını engeller */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- SOL PANEL (KONTROLLER VE ŞABLONLAR) --- */
+        .sidebar {
+            width: 350px;
+            background-color: var(--panel-bg);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 2px 0 15px rgba(0, 243, 255, 0.1);
+            z-index: 10;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-area h1 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin: 0;
+            text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group label {
+            color: var(--neon-pink);
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
+        }
+
+        input[type="text"] {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #333;
+            color: #fff;
+            font-size: 1.2rem;
+            padding: 10px 5px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-bottom: 2px solid var(--neon-cyan);
+            box-shadow: 0 4px 10px -4px var(--neon-cyan);
+        }
+
+        button {
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--neon-cyan);
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--neon-cyan);
+        }
+
+        .btn-draw {
+            border-color: var(--neon-pink);
+            margin-top: 10px;
+        }
+
+        .btn-draw:hover {
+            background: var(--neon-pink);
+            color: #fff;
+            box-shadow: 0 0 15px var(--neon-pink), 0 0 30px var(--neon-pink);
+        }
+
+        .presets {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .presets h3 {
+            font-size: 1rem;
+            color: #888;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* --- SAĞ TARAF (GRAFİK ALANI) --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        #plot-container {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border-radius: 10px;
+        }
+
+        /* --- MOBİL UYUM (RESPONSIVE) AYARLARI --- */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Yan yana yerine alt alta diz */
+                height: auto; 
+                overflow-y: auto; /* Ekrana sığmazsa kaydırma çubuğu çıksın */
+            }
+
+            .sidebar {
+                width: 100%; /* Paneli ekranın tam genişliğine yay */
+                padding: 20px 15px;
+                box-shadow: 0 5px 15px rgba(0, 243, 255, 0.1);
+                z-index: 1;
+            }
+
+            .main-content {
+                width: 100%;
+                min-height: 450px; /* Grafiğin telefonda ezilmemesi için minimum yükseklik */
+                padding: 10px;
+            }
+
+            .logo-area h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo-area">
+            <h1>MATH.FX</h1>
+        </div>
+
+        <div class="input-group">
+            <label for="mathInput">f(x) =</label>
+            <input type="text" id="mathInput" placeholder="Örn: sin(x) * x" value="sin(x) * x">
+            <button class="btn-draw" onclick="drawGraph()">Çizimi Başlat 🚀</button>
+        </div>
+
+        <div class="presets">
+            <h3>✨ Havalı Şablonlar</h3>
+            <button onclick="loadPreset('sin(x^2) + cos(x^2) * x')">🌀 Kuantum Dalgası</button>
+            <button onclick="loadPreset('heart')">❤️ Aşk Denklemi</button>
+            <button onclick="loadPreset('butterfly')">🦋 Kelebek Eğrisi</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="plot-container"></div>
+    </div>
+
+    <script>
+        // Sayfa yüklendiğinde varsayılan fonksiyonu çiz
+        window.onload = () => drawGraph();
+
+        function loadPreset(type) {
+            document.getElementById('mathInput').value = type;
+            drawGraph();
+        }
+
+        function drawGraph() {
+            const rawInput = document.getElementById('mathInput').value.trim();
+            const xValues = [];
+            const yValues = [];
+
+            // 1. ÖZEL ŞABLONLAR: Kalp ve Kelebek gibi özel formüller (Parametrik çizim)
+            if (rawInput === 'heart') {
+                for (let t = 0; t <= Math.PI * 2; t += 0.05) {
+                    xValues.push(16 * Math.pow(Math.sin(t), 3));
+                    yValues.push(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+                }
+                renderPlotly(xValues, yValues, '#ff007f'); // Pembe renk
+                return;
+            } 
+            
+            if (rawInput === 'butterfly') {
+                for (let t = 0; t <= Math.PI * 12; t += 0.05) {
+                    let r = Math.exp(Math.cos(t)) - 2 * Math.cos(4 * t) - Math.pow(Math.sin(t / 12), 5);
+                    xValues.push(Math.sin(t) * r);
+                    yValues.push(Math.cos(t) * r);
+                }
+                renderPlotly(xValues, yValues, '#00f3ff'); // Cam göbeği renk
+                return;
+            }
+
+            // 2. KULLANICI GİRDİSİ: Dinamik Parsing (Math.js)
+            try {
+                const compiled = math.compile(rawInput);
+                
+                for (let x = -15; x <= 15; x += 0.1) {
+                    xValues.push(x);
+                    yValues.push(compiled.evaluate({x: x}));
+                }
+                
+                renderPlotly(xValues, yValues, '#00f3ff');
+            } catch (error) {
+                alert("Geçersiz bir fonksiyon! Çarpma işlemleri için '*' kullanmayı unutma (Örn: 2*x).");
+                console.error(error);
+            }
+        }
+
+        // Plotly.js ile Grafik Render Fonksiyonu
+        function renderPlotly(xData, yData, lineColor) {
+            const trace = {
+                x: xData,
+                y: yData,
+                type: 'scatter',
+                mode: 'lines',
+                line: {
+                    color: lineColor,
+                    width: 3,
+                    shape: 'spline' 
+                }
+            };
+
+            const layout = {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                margin: { t: 40, b: 40, l: 40, r: 40 },
+                xaxis: {
+                    gridcolor: '#222',
+                    zerolinecolor: '#555',
+                    tickfont: { color: '#888' }
+                },
+                yaxis: {
+                    gridcolor: '#222',
+                    zerolinecolor: '#555',
+                    tickfont: { color: '#888' }
+                },
+                hoverlabel: {
+                    bgcolor: '#11111a',
+                    font: { color: lineColor, family: 'Courier New' }
+                }
+            };
+
+            // Menüyü gizle (displayModeBar: false) ve mobilde otomatik ölçekle (responsive: true)
+            Plotly.newPlot('plot-container', [trace], layout, { displayModeBar: false, responsive: true });
+        }
+    </script>
+</body>
+</html>
