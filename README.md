@@ -30,4 +30,6 @@ Projeyi hemen denemek için buraya tıklayın: [MATH.FX Canlı Demo](https://<ku
 
 Bu proje herhangi bir sunucu veya derleme (build) işlemine ihtiyaç duymaz. Tamamen istemci tarafında (Client-side) çalışır.
 
+https://mert-kekik.github.io/Fonksiyoncizim/
+
 
