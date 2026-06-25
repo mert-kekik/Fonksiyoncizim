@@ -30,6 +30,4 @@ Projeyi hemen denemek için buraya tıklayın: [MATH.FX Canlı Demo](https://<ku
 
 Bu proje herhangi bir sunucu veya derleme (build) işlemine ihtiyaç duymaz. Tamamen istemci tarafında (Client-side) çalışır.
 
-1. Repoyu bilgisayarınıza klonlayın:
-   ```bash
-   git clone [https://github.com/](https://github.com/)<kullanici-adin>/math-fx-repo-adin.git
+
